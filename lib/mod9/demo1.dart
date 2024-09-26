@@ -17,6 +17,13 @@ class _DemoAPIState extends State<DemoAPI> {
   Joke? myJoke;
   List<Joke> jokes = [];
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    callForAJokeList();
+  }
+
   void callForASingleJoke() async {
     //prépartion de l'url
     var url = Uri.parse("https://api.chucknorris.io/jokes/random");
@@ -45,7 +52,7 @@ class _DemoAPIState extends State<DemoAPI> {
       if (json is List) {
         setState(() {
           jokes =
-              List<Joke>.from(json.map((jsonJoke) => Joke.fromJson(jsonJoke)));
+          List<Joke>.from(json.map((jsonJoke) => Joke.fromJson(jsonJoke)));
         });
       }
     }
@@ -63,13 +70,28 @@ class _DemoAPIState extends State<DemoAPI> {
             FilledButton(
                 onPressed: callForAJokeList, child: Text("Get jokes !")),
             Expanded(
-              child: ListView.builder(
-                  itemCount: jokes.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Wrap(children: [
-                      Image.network(jokes[index].icon!),
-                      Text(jokes[index].content!),
-                    ]);
+              child: FutureBuilder<Response>(
+                  future: get(Uri.parse(
+                      "https://api.chucknorris.io/jokes/search?query=Robin")),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data?.body != null) {
+                      var body = snapshot.data?.body;
+                      print(body);
+                      var json = convert.jsonDecode(body!);
+                      json = json['result'];
+
+                      jokes = List<Joke>.from(
+                          json.map((jsonJoke) => Joke.fromJson(jsonJoke)));
+                      return Expanded(
+                        child: ListView.builder(
+                            itemCount: jokes.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Text(jokes[index].content!);
+                            }),
+                      );
+                    }
+
+                    return CircularProgressIndicator();
                   }),
             )
           ],
