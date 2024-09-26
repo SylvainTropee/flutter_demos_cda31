@@ -66,7 +66,10 @@ class _DemoAPIState extends State<DemoAPI> {
               child: ListView.builder(
                   itemCount: jokes.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Text(jokes[index].content!);
+                    return Wrap(children: [
+                      Image.network(jokes[index].icon!),
+                      Text(jokes[index].content!),
+                    ]);
                   }),
             )
           ],
